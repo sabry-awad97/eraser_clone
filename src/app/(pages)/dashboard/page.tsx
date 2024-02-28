@@ -1,9 +1,42 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs';
+import { api } from '@/convex/_generated/api';
+import {
+  LogoutLink,
+  useKindeBrowserClient,
+} from '@kinde-oss/kinde-auth-nextjs';
+import { useConvex } from 'convex/react';
+import { useEffect } from 'react';
 
 const Dashboard = () => {
+  const { user } = useKindeBrowserClient();
+  const convex = useConvex();
+
+  useEffect(() => {
+    const checkAndCreateUserIfNotExist = async () => {
+      try {
+        if (!user?.email) return;
+
+        const users = await convex.query(api.user.getUsers, {
+          email: user.email,
+        });
+
+        if (users.length === 0) {
+          await convex.mutation(api.user.createUser, {
+            name: user.given_name ?? '',
+            email: user.email,
+            image: user.picture ?? '',
+          });
+        }
+      } catch (error) {
+        console.error('Error while checking user:', error);
+      }
+    };
+
+    checkAndCreateUserIfNotExist();
+  }, [convex, user]);
+
   return (
     <div>
       Dashboard
