@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import ConvexClientProvider from './_components/ConvexClientProvider';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -23,7 +24,9 @@ export default function RootLayout({
           'debug-screens': process.env.NODE_ENV === 'development',
         })}
       >
-        <main>{children}</main>
+        <main>
+          <ConvexClientProvider>{children}</ConvexClientProvider>
+        </main>
       </body>
     </html>
   );
