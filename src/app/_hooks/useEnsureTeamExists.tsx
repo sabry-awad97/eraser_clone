@@ -1,11 +1,14 @@
 import { api } from '@/convex/_generated/api';
-import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
+import { KindeUser } from '@kinde-oss/kinde-auth-nextjs/dist/types';
 import { useConvex } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-const useEnsureTeamExists = () => {
-  const { user: currentUser } = useKindeBrowserClient();
+const useEnsureTeamExists = ({
+  currentUser,
+}: {
+  currentUser: KindeUser | null;
+}) => {
   const convexClient = useConvex();
   const nextRouter = useRouter();
 

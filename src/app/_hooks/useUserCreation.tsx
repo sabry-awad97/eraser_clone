@@ -18,7 +18,7 @@ const useUserCreation = () => {
 
         if (users.length === 0) {
           await convex.mutation(api.user.createUser, {
-            name: user.given_name ?? '',
+            name: `${user.given_name ?? ''}${user.given_name && user.family_name ? ' ' : ''}${user.family_name ?? ''}`,
             email: user.email,
             image: user.picture ?? '',
           });
@@ -30,6 +30,8 @@ const useUserCreation = () => {
 
     checkAndCreateUserIfNotExist();
   }, [convex, user]);
+
+  return { user };
 };
 
 export default useUserCreation;
