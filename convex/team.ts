@@ -1,4 +1,5 @@
 import { v } from 'convex/values';
+import { Doc } from '../convex/_generated/dataModel';
 import { mutation, query } from './_generated/server';
 
 export const getTeams = query({
@@ -20,3 +21,5 @@ export const createTeam = mutation({
     return result;
   },
 });
+
+export type Team = Doc<'teams'>;
