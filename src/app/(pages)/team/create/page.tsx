@@ -10,10 +10,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { api } from '@/convex/_generated/api';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
+import { useMutation } from 'convex/react';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   teamName: z.string().min(2, {
@@ -24,6 +29,10 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const TeamCreation = () => {
+  const createTeam = useMutation(api.team.createTeam);
+  const { user } = useKindeBrowserClient();
+  const nextRouter = useRouter();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,8 +42,17 @@ const TeamCreation = () => {
 
   const { teamName } = form.watch();
 
-  const onSubmit = (values: FormValues) => {
-    console.log(values);
+  const onSubmit = async (values: FormValues) => {
+    if (!user?.email) return;
+
+    const result = await createTeam({
+      teamName: values.teamName,
+      owner: user.email,
+    });
+
+    console.log(result);
+    nextRouter.push('/dashboard');
+    toast('Team created successfully !!!');
   };
 
   return (
