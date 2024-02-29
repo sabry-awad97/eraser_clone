@@ -1,13 +1,41 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+const formSchema = z.object({
+  teamName: z.string().min(2, {
+    message: 'Team name must be at least 2 characters.',
+  }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 const TeamCreation = () => {
-  const [teamName, setTeamName] = useState('');
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      teamName: '',
+    },
+  });
+
+  const { teamName } = form.watch();
+
+  const onSubmit = (values: FormValues) => {
+    console.log(values);
+  };
 
   return (
     <div className="my-16 px-6 md:px-16">
@@ -21,29 +49,45 @@ const TeamCreation = () => {
           height: 'auto',
         }}
       />
+
       <div className="mt-8 flex flex-col items-center">
-        <h2 className="py-3 text-[40px] font-bold">
+        <h1 className="py-3 text-[40px] font-bold">
           What should we call your team?
-        </h2>
-        <h2 className="text-gray-500">
+        </h1>
+
+        <p className="text-gray-500">
           You can always change this later from settings.
-        </h2>
-        <div className="mt-7 w-[40%]">
-          <Label className="text-gray-500">Team Name</Label>
-          <Input
-            placeholder="Team Name"
-            className="mt-3"
-            value={teamName}
-            onChange={e => setTeamName(e.target.value)}
-          />
-        </div>
-        <Button
-          className="mt-9 w-[30%] bg-blue-500 hover:bg-blue-600"
-          disabled={!teamName.length}
-          onClick={() => {}}
-        >
-          Create Team
-        </Button>
+        </p>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-7 w-[40%]">
+            <FormField
+              control={form.control}
+              name="teamName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">Team Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Team Name"
+                      className="mt-3"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              type="submit"
+              className="mt-9 w-full bg-blue-500 hover:bg-blue-600"
+              disabled={!teamName.length}
+            >
+              Create Team
+            </Button>
+          </form>
+        </Form>
       </div>
     </div>
   );
