@@ -1,6 +1,6 @@
 'use client';
 
-import { MAX_FREE_FILE } from '@/app/_constants';
+import { MAX_FREE_FILES } from '@/app/_constants';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import {
@@ -16,7 +16,9 @@ import { useConvex } from 'convex/react';
 import { ChevronDown, LayoutGrid } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import FileCreationDialog from './FileCreationDialog';
+import FileUsageInfo from './FileUsageInfo';
 import LowerMenu from './LowerMenu';
 import PlanUpgradeDialog from './PlanUpgradeDialog';
 import TeamList from './TeamList';
@@ -31,6 +33,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
   const convexClient = useConvex();
   const [teams, setTeams] = useState<Team[]>([]);
   const [activeTeam, setActiveTeam] = useState<Team | null>(null);
+  const [usedFiles, setUsedFiles] = useState(0);
 
   useEffect(() => {
     getTeamList();
@@ -45,6 +48,31 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
 
     setTeams(teams);
     setActiveTeam(teams[0] ?? null);
+  };
+
+  const handleFileCreation = async (fileName: string) => {
+    if (!activeTeam?._id || !user?.email) return;
+
+    try {
+      await convexClient.mutation(api.file.createFile, {
+        fileName: fileName,
+        teamId: activeTeam._id,
+        owner: user.email,
+      });
+
+      const result = await convexClient.query(api.file.getFiles, {
+        teamId: activeTeam._id,
+      });
+
+      setUsedFiles(result.length);
+
+      toast.success('File Created', {
+        description: `Successfully created file ${fileName}`,
+      });
+    } catch (error) {
+      console.error('Error while creating file:', error);
+      toast.error('Error while creating file.');
+    }
   };
 
   return (
@@ -103,19 +131,14 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
             </Button>
           </DialogTrigger>
 
-          {MAX_FREE_FILE > 0 ? <FileCreationDialog /> : <PlanUpgradeDialog />}
+          {MAX_FREE_FILES > 0 ? (
+            <FileCreationDialog onCreate={handleFileCreation} />
+          ) : (
+            <PlanUpgradeDialog />
+          )}
         </Dialog>
 
-        <div className="mt-5 h-4 w-full rounded-full bg-gray-200">
-          <div className={`h-4 w-[40%] rounded-full bg-blue-600`}></div>
-        </div>
-
-        <p className="mt-3 text-[12px]">
-          <strong>1</strong> out of <strong>5</strong> files used
-        </p>
-        <p className="mt-1 text-[12px]">
-          Upgrade your plan for unlimited access.
-        </p>
+        <FileUsageInfo usedFiles={usedFiles} maxFiles={MAX_FREE_FILES} />
       </div>
     </div>
   );

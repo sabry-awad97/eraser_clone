@@ -11,4 +11,9 @@ export default defineSchema({
     teamName: v.string(),
     owner: v.string(),
   }),
+  files: defineTable({
+    fileName: v.string(),
+    teamId: v.id('teams'),
+    owner: v.string(),
+  }),
 });

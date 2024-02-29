@@ -1,1 +1,1 @@
-export const MAX_FREE_FILE = 0;
+export const MAX_FREE_FILES = 5;

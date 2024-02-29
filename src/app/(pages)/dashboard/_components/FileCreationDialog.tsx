@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import {
   DialogClose,
@@ -10,12 +12,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 
-const FileCreationDialog = () => {
-  const [fileInput, setFileInput] = useState('');
+interface FileCreationDialogProps {
+  onCreate: (file: string) => void;
+}
 
-  const onFileCreate = (fileName: string) => {
-    console.log(fileName);
-  };
+const FileCreationDialog: React.FC<FileCreationDialogProps> = ({
+  onCreate,
+}) => {
+  const [fileInput, setFileInput] = useState('');
 
   return (
     <DialogContent>
@@ -35,7 +39,7 @@ const FileCreationDialog = () => {
             type="button"
             className="bg-blue-600 hover:bg-blue-700"
             disabled={!fileInput.length}
-            onClick={() => onFileCreate(fileInput)}
+            onClick={() => onCreate(fileInput)}
           >
             Create
           </Button>
