@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { DialogHeader, DialogFooter } from '@/components/ui/dialog';
 import {
   Popover,
   PopoverContent,
@@ -12,17 +13,35 @@ import { Team } from '@/convex/team';
 import { cn } from '@/lib/utils';
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs/dist/types';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@radix-ui/react-dialog';
 import { useConvex } from 'convex/react';
-import { ChevronDown, LayoutGrid, LogOut, Settings, Users } from 'lucide-react';
+import {
+  Archive,
+  ChevronDown,
+  Flag,
+  Github,
+  LayoutGrid,
+  LogOut,
+  Settings,
+  Users,
+} from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Input } from 'postcss';
 import { useEffect, useState } from 'react';
 
 interface Props {
   user: KindeUser | null;
 }
 
-const menu = [
+const upperMenuItems = [
   {
     id: 1,
     name: 'Create Team',
@@ -34,6 +53,27 @@ const menu = [
     name: 'Settings',
     href: '',
     icon: Settings,
+  },
+];
+
+const lowerMenuItems = [
+  {
+    id: 1,
+    name: 'Getting Started',
+    href: '',
+    icon: Flag,
+  },
+  {
+    id: 2,
+    name: 'Github',
+    href: '',
+    icon: Github,
+  },
+  {
+    id: 3,
+    name: 'Archive',
+    href: '',
+    icon: Archive,
   },
 ];
 
@@ -58,7 +98,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
     setActiveTeam(teams[0] ?? null);
   };
 
-  const handleMenuItemClick = (item: (typeof menu)[number]) => {
+  const handleMenuItemClick = (item: (typeof upperMenuItems)[number]) => {
     if (item.href) {
       nextRouter.push(item.href);
     }
@@ -66,7 +106,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="fixed flex h-screen w-72 flex-col border-r p-6">
-      <div>
+      <div className="flex-1">
         <Popover>
           <PopoverTrigger>
             <div className="flex cursor-pointer items-center gap-3 rounded-lg p-3 hover:bg-slate-200">
@@ -104,7 +144,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
             <Separator className="mt-2 bg-slate-100" />
 
             <ul>
-              {menu.map((item, index) => (
+              {upperMenuItems.map((item, index) => (
                 <li
                   key={index}
                   className="flex cursor-pointer items-center gap-2 rounded-lg p-2 text-sm hover:bg-gray-100"
@@ -157,6 +197,39 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
           <LayoutGrid className="h-4 w-4" />
           All Files
         </Button>
+      </div>
+
+      <div>
+        <ul>
+          {lowerMenuItems.map((item, index) => (
+            <li
+              key={index}
+              className="flex cursor-pointer gap-2 rounded-md p-1 px-2 text-[14px] hover:bg-gray-100"
+            >
+              <item.icon className="h-4 w-4" />
+              {item.name}
+            </li>
+          ))}
+        </ul>
+
+        <Dialog>
+          <DialogTrigger className="w-full" asChild>
+            <Button className="mt-3 w-full justify-start bg-blue-600 hover:bg-blue-700">
+              New File
+            </Button>
+          </DialogTrigger>
+        </Dialog>
+
+        <div className="mt-5 h-4 w-full rounded-full bg-gray-200">
+          <div className={`h-4 w-[40%] rounded-full bg-blue-600`}></div>
+        </div>
+
+        <p className="mt-3 text-[12px]">
+          <strong>1</strong> out of <strong>5</strong> files used
+        </p>
+        <p className="mt-1 text-[12px]">
+          Upgrade your plan for unlimited access.
+        </p>
       </div>
     </div>
   );
