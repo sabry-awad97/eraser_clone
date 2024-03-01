@@ -1,6 +1,7 @@
 'use client';
 
 import { MAX_FREE_FILES } from '@/app/_constants';
+import { useTeams } from '@/app/_hooks/useTeams';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import {
@@ -9,10 +10,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import { api } from '@/convex/_generated/api';
 import { Team } from '@/convex/team';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs/dist/types';
-import { useConvex } from 'convex/react';
 import { ChevronDown, LayoutGrid } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -31,58 +30,20 @@ interface Props {
 }
 
 const SideNavbar: React.FC<Props> = ({ user }) => {
-  const convexClient = useConvex();
-  const [teams, setTeams] = useState<Team[]>([]);
+  const teams = useTeams(user?.email);
   const [activeTeam, setActiveTeam] = useState<Team | null>(null);
-  const [usedFiles, setUsedFiles] = useState(0);
-  const { updateFiles } = useFileContext();
+  const { files: usedFiles, fetchFiles, createFile } = useFileContext();
 
   useEffect(() => {
-    getTeamList();
-  }, [user]);
-
-  useEffect(() => {
-    if (activeTeam) {
-      fetchFiles();
-    }
-  }, [activeTeam]);
-
-  const getTeamList = async () => {
-    if (!user?.email) return;
-
-    const teams = await convexClient.query(api.team.getTeams, {
-      email: user.email,
-    });
-
-    setTeams(teams);
-    setActiveTeam(teams[0] ?? null);
-  };
-
-  const fetchFiles = async () => {
     if (!activeTeam?._id) return;
-
-    const files = await convexClient.query(api.file.getFiles, {
-      teamId: activeTeam._id,
-    });
-
-    updateFiles(files);
-    setUsedFiles(files.length);
-  };
+    fetchFiles(activeTeam._id);
+  }, [activeTeam?._id]);
 
   const handleFileCreation = async (fileName: string) => {
     if (!activeTeam?._id || !user?.email) return;
 
     try {
-      await convexClient.mutation(api.file.createFile, {
-        fileName: fileName,
-        teamId: activeTeam._id,
-        owner: user.email,
-        archive: false,
-        document: '',
-        whiteboard: '',
-      });
-
-      await fetchFiles();
+      await createFile(activeTeam._id, fileName, user.email);
 
       toast.success('File Created', {
         description: `Successfully created file ${fileName}`,
@@ -107,7 +68,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
                 style={{ width: 'auto', height: 'auto' }}
               />
               <h2 className="flex items-center gap-2 text-[17px] font-bold">
-                <span>{activeTeam?.teamName}</span>
+                <span>{activeTeam?.teamName || 'Select Team'}</span>
                 <ChevronDown className="h-4 w-4" />
               </h2>
             </div>
@@ -115,7 +76,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
           <PopoverContent className="w-full">
             <TeamList
               teams={teams}
-              activeTeam={activeTeam}
+              activeTeamId={activeTeam?._id}
               onTeamClick={setActiveTeam}
             />
 
@@ -149,14 +110,14 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
             </Button>
           </DialogTrigger>
 
-          {MAX_FREE_FILES > usedFiles ? (
+          {MAX_FREE_FILES > usedFiles.length ? (
             <FileCreationDialog onCreate={handleFileCreation} />
           ) : (
             <PlanUpgradeDialog />
           )}
         </Dialog>
 
-        <FileUsageInfo usedFiles={usedFiles} maxFiles={MAX_FREE_FILES} />
+        <FileUsageInfo usedFiles={usedFiles.length} maxFiles={MAX_FREE_FILES} />
       </div>
     </div>
   );
