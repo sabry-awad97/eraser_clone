@@ -8,6 +8,7 @@ export const getFiles = query({
     const users = await ctx.db
       .query('files')
       .filter(q => q.eq(q.field('teamId'), args.teamId))
+      .order('desc')
       .collect();
 
     return users;

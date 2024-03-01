@@ -17,6 +17,7 @@ import { ChevronDown, LayoutGrid } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useFileContext } from '../_context/FileContext';
 import FileCreationDialog from './FileCreationDialog';
 import FileUsageInfo from './FileUsageInfo';
 import LowerMenu from './LowerMenu';
@@ -34,10 +35,17 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [activeTeam, setActiveTeam] = useState<Team | null>(null);
   const [usedFiles, setUsedFiles] = useState(0);
+  const { updateFiles } = useFileContext();
 
   useEffect(() => {
     getTeamList();
   }, [user]);
+
+  useEffect(() => {
+    if (activeTeam) {
+      fetchFiles();
+    }
+  }, [activeTeam]);
 
   const getTeamList = async () => {
     if (!user?.email) return;
@@ -48,6 +56,17 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
 
     setTeams(teams);
     setActiveTeam(teams[0] ?? null);
+  };
+
+  const fetchFiles = async () => {
+    if (!activeTeam?._id) return;
+
+    const files = await convexClient.query(api.file.getFiles, {
+      teamId: activeTeam._id,
+    });
+
+    updateFiles(files);
+    setUsedFiles(files.length);
   };
 
   const handleFileCreation = async (fileName: string) => {
@@ -63,11 +82,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
         whiteboard: '',
       });
 
-      const result = await convexClient.query(api.file.getFiles, {
-        teamId: activeTeam._id,
-      });
-
-      setUsedFiles(result.length);
+      await fetchFiles();
 
       toast.success('File Created', {
         description: `Successfully created file ${fileName}`,
