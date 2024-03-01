@@ -12,6 +12,12 @@
     "kill-port": "npx kill-port 3000"
   },
   "dependencies": {
+    "@editorjs/checklist": "^1.6.0",
+    "@editorjs/editorjs": "^2.29.0",
+    "@editorjs/header": "^2.8.1",
+    "@editorjs/list": "^1.9.0",
+    "@editorjs/paragraph": "^2.11.3",
+    "@editorjs/warning": "^1.4.0",
     "@hookform/resolvers": "^3.3.4",
     "@kinde-oss/kinde-auth-nextjs": "^2.1.15",
     "@radix-ui/react-dialog": "^1.0.5",
