@@ -14,7 +14,8 @@ import { Team } from '@/convex/team';
 import { KindeUser } from '@kinde-oss/kinde-auth-nextjs/dist/types';
 import { ChevronDown, LayoutGrid } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useFileContext } from '../_context/FileContext';
 import FileCreationDialog from './FileCreationDialog';
@@ -30,14 +31,27 @@ interface Props {
 }
 
 const SideNavbar: React.FC<Props> = ({ user }) => {
-  const teams = useTeams(user?.email);
-  const [activeTeam, setActiveTeam] = useState<Team | null>(null);
   const { files: usedFiles, fetchFiles, createFile } = useFileContext();
+  const teams = useTeams(user?.email);
+
+  const nextRouter = useRouter();
+
+  const searchParams = useSearchParams();
+  const teamId = searchParams.get('teamId');
+
+  const activeTeam = useMemo(
+    () => teams.find(team => team._id === teamId) || null,
+    [teams, teamId],
+  );
 
   useEffect(() => {
     if (!activeTeam?._id) return;
     fetchFiles(activeTeam._id);
   }, [activeTeam?._id]);
+
+  const handleTeamClick = (clickedTeam: Team) => {
+    nextRouter.push(`?teamId=${clickedTeam._id}`);
+  };
 
   const handleFileCreation = async (fileName: string) => {
     if (!activeTeam?._id || !user?.email) return;
@@ -46,7 +60,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
       await createFile(activeTeam._id, fileName, user.email);
 
       toast.success('File Created', {
-        description: `Successfully created file ${fileName}`,
+        description: `Successfully created file: ${fileName}`,
       });
     } catch (error) {
       console.error('Error while creating file:', error);
@@ -77,7 +91,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
             <TeamList
               teams={teams}
               activeTeamId={activeTeam?._id}
-              onTeamClick={setActiveTeam}
+              onTeamClick={handleTeamClick}
             />
 
             <Separator className="mt-2 bg-slate-100" />
