@@ -19,6 +19,9 @@ export const createFile = mutation({
     fileName: v.string(),
     teamId: v.id('teams'),
     owner: v.string(),
+    archive: v.boolean(),
+    document: v.string(),
+    whiteboard: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert('files', args);

@@ -58,6 +58,9 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
         fileName: fileName,
         teamId: activeTeam._id,
         owner: user.email,
+        archive: false,
+        document: '',
+        whiteboard: '',
       });
 
       const result = await convexClient.query(api.file.getFiles, {
@@ -131,7 +134,7 @@ const SideNavbar: React.FC<Props> = ({ user }) => {
             </Button>
           </DialogTrigger>
 
-          {MAX_FREE_FILES > 0 ? (
+          {MAX_FREE_FILES > usedFiles ? (
             <FileCreationDialog onCreate={handleFileCreation} />
           ) : (
             <PlanUpgradeDialog />

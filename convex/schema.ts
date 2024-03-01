@@ -15,5 +15,8 @@ export default defineSchema({
     fileName: v.string(),
     teamId: v.id('teams'),
     owner: v.string(),
+    archive: v.boolean(),
+    document: v.string(),
+    whiteboard: v.string(),
   }),
 });
