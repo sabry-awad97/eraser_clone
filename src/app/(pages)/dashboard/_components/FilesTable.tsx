@@ -19,6 +19,7 @@ import {
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
 import { Archive, MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useFileContext } from '../_context/FileContext';
 
 const formatDate = (dateNumber: number) => {
@@ -35,6 +36,7 @@ const FilesTable = () => {
 
   const { files } = useFileContext();
   const { user } = useKindeBrowserClient();
+  const nextRouter = useRouter();
 
   return (
     <div className="mt-10 overflow-x-auto rounded-md border">
@@ -56,16 +58,20 @@ const FilesTable = () => {
         </TableHeader>
 
         <TableBody className="divide-y divide-gray-200">
-          {files.map((rowData, rowIndex) => (
-            <TableRow key={rowIndex} className="odd:bg-gray-50">
+          {files.map((file, rowIndex) => (
+            <TableRow
+              key={rowIndex}
+              className="odd:bg-gray-50 hover:cursor-pointer"
+              onClick={() => nextRouter.push('/workspace/' + file._id)}
+            >
               <TableCell className="whitespace-nowrap px-4 py-2 text-gray-700">
-                {rowData.fileName}
+                {file.fileName}
               </TableCell>
               <TableCell className="whitespace-nowrap px-4 py-2 text-gray-700">
-                {formatDate(rowData._creationTime)}
+                {formatDate(file._creationTime)}
               </TableCell>
               <TableCell className="whitespace-nowrap px-4 py-2 text-gray-700">
-                {formatDate(rowData._creationTime)}
+                {formatDate(file._creationTime)}
               </TableCell>
               <TableCell className="whitespace-nowrap px-4 py-2 text-gray-700">
                 <Image
