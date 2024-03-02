@@ -10,29 +10,18 @@ import List from '@editorjs/list';
 import Paragraph from '@editorjs/paragraph';
 import Warning from '@editorjs/warning';
 import { useMutation } from 'convex/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 
-const rawDocument = {
-  time: 1550476186479,
-  blocks: [
-    {
-      data: {
-        text: 'Document Name',
-        level: 2,
-      },
-      id: '123',
-      type: 'header',
-    },
-    {
-      data: {
-        level: 4,
-      },
-      id: '1234',
-      type: 'header',
-    },
-  ],
-  version: '2.8.1',
+const generateDynamicId = (length: number) => {
+  let result = '';
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 };
 
 interface Props {
@@ -44,6 +33,31 @@ interface Props {
 const Editor: React.FC<Props> = ({ isSaved, fileId, file }) => {
   const editorRef = useRef<EditorJS | null>(null);
   const updateDocument = useMutation(api.file.updateDocument);
+
+  const rawDocument = useMemo(
+    () => ({
+      time: Date.now(),
+      blocks: [
+        {
+          data: {
+            text: file?.fileName,
+            level: 2,
+          },
+          id: generateDynamicId(9),
+          type: 'header',
+        },
+        {
+          data: {
+            level: 4,
+          },
+          id: generateDynamicId(9),
+          type: 'header',
+        },
+      ],
+      version: '2.29.0',
+    }),
+    [file?.fileName],
+  );
 
   useEffect(() => {
     const initEditor = () => {
