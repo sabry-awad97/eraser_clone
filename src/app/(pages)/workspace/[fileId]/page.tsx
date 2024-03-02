@@ -45,7 +45,10 @@ const WorkspaceFilePage = ({ params: { fileId } }: Props) => {
 
   return (
     <div>
-      <WorkspaceHeader onSave={() => setIsDocumentSaved(true)} />
+      <WorkspaceHeader
+        fileName={file?.fileName}
+        onSave={() => setIsDocumentSaved(true)}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2">
         <div className="h-screen">

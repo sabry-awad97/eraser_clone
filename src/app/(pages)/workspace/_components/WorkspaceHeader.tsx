@@ -4,10 +4,11 @@ import Image from 'next/image';
 import React from 'react';
 
 interface Props {
+  fileName?: string;
   onSave: () => void;
 }
 
-const WorkspaceHeader = ({ onSave }: Props) => {
+const WorkspaceHeader = ({ fileName, onSave }: Props) => {
   return (
     <div className="flex items-center justify-between border-b p-3">
       <div className="flex items-center gap-2">
@@ -21,7 +22,7 @@ const WorkspaceHeader = ({ onSave }: Props) => {
             height: 'auto',
           }}
         />
-        <h2>File Name</h2>
+        <h2>{fileName}</h2>
       </div>
       <div className="flex items-center gap-4">
         <Button
