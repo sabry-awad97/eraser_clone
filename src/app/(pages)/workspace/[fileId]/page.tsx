@@ -15,7 +15,7 @@ interface Props {
 }
 
 const WorkspaceFilePage = ({ params: { fileId } }: Props) => {
-  const [isSaved, setIsSaved] = useState(false);
+  const [isDocumentSaved, setIsDocumentSaved] = useState(false);
   const convex = useConvex();
   const [file, setFile] = useState<File | null>(null);
 
@@ -45,11 +45,16 @@ const WorkspaceFilePage = ({ params: { fileId } }: Props) => {
 
   return (
     <div>
-      <WorkspaceHeader onSave={() => setIsSaved(prev => !prev)} />
+      <WorkspaceHeader onSave={() => setIsDocumentSaved(true)} />
 
       <div className="grid grid-cols-1 md:grid-cols-2">
         <div className="h-screen">
-          <Editor isSaved={isSaved} fileId={fileId} file={file} />
+          <Editor
+            onSave={() => setIsDocumentSaved(false)}
+            isDocumentSaved={isDocumentSaved}
+            fileId={fileId}
+            file={file}
+          />
         </div>
         <div className="h-screen border-l">Canvas</div>
       </div>

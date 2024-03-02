@@ -25,12 +25,13 @@ const generateDynamicId = (length: number) => {
 };
 
 interface Props {
-  isSaved: boolean;
+  isDocumentSaved: boolean;
   fileId: Id<'files'>;
   file: File | null;
+  onSave: () => void;
 }
 
-const Editor: React.FC<Props> = ({ isSaved, fileId, file }) => {
+const Editor: React.FC<Props> = ({ isDocumentSaved, fileId, file, onSave }) => {
   const editorRef = useRef<EditorJS | null>(null);
   const updateDocument = useMutation(api.file.updateDocument);
 
@@ -61,6 +62,10 @@ const Editor: React.FC<Props> = ({ isSaved, fileId, file }) => {
 
   useEffect(() => {
     const initEditor = () => {
+      if (editorRef.current) {
+        editorRef.current.destroy();
+      }
+
       editorRef.current = new EditorJS({
         holder: 'editorjs',
         tools: {
@@ -98,7 +103,7 @@ const Editor: React.FC<Props> = ({ isSaved, fileId, file }) => {
         editorRef.current.destroy();
       }
     };
-  }, [file]);
+  }, [file, rawDocument]);
 
   useEffect(() => {
     const saveDocument = async () => {
@@ -109,6 +114,7 @@ const Editor: React.FC<Props> = ({ isSaved, fileId, file }) => {
             _id: fileId,
             document: JSON.stringify(outputData),
           });
+          onSave();
           toast('Document Updated!');
         }
       } catch (error) {
@@ -117,10 +123,10 @@ const Editor: React.FC<Props> = ({ isSaved, fileId, file }) => {
       }
     };
 
-    if (isSaved) {
+    if (isDocumentSaved) {
       saveDocument();
     }
-  }, [isSaved]);
+  }, [isDocumentSaved, fileId, onSave]);
 
   return <div id="editorjs" className="ml-20" />;
 };
